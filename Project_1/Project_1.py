@@ -1,79 +1,145 @@
-# Learning how SPICE "thinks" with kernels -- basic position/velocity in 3D space
+# This project finds the barycenter of the Solar System wrt the Sun over a time interval
+# Following along with [ThomasAlbin's Space Science Tutorials](https://towardsdatascience.com/@thomas.albin)
 
 import spiceypy
+import datetime
+import numpy
 import math
-
-# Errors tell us that we need generic kernel files (from NAIF public repo) -- kernels are added/"furnished" with the SPICE furnsh function
-spiceypy.furnsh("kernels/lsk/naif0012.tls.pc")
-spiceypy.furnsh("kernels/spk/de432s.bsp")
+from matplotlib import pyplot
 
 # ---------------------------------------------------
-# Compute position of Earth with respect to (wrt) the Sun when I was born:
 
-# One of the many ways to go from UTC to Ephemeris time (see utc2et docs) -- This is the Ephemeris time when I was born!
-ET_BIRTHDAY = spiceypy.utc2et("11 DEC 2002 0:0:0")
+# Instead of furnishing kernels individually, you do them all at once with a meta file
+spiceypy.furnsh("Project_1/meta_kernel.txt")
 
-# Computing geometric state (position and velocity) of Earth with respects to the Sun
-EARTH_STATE_WRT_SUN, EARTH_SUN_LT = spiceypy.spkgeo(
-    targ=399, et=ET_BIRTHDAY, ref="ECLIPJ2000", obs=10
+
+# ---------------------------------------------------
+
+# Initial time (my birthday hehe)
+INITIAL_TIME_UTC = datetime.datetime(
+    year=2002, month=12, day=11, hour=0, minute=0, second=0
 )
 
+# Final time after an arbitrary period
+DAYS_ELAPSED = 10_000
+FINAL_TIME_UTC = INITIAL_TIME_UTC + datetime.timedelta(days=DAYS_ELAPSED)
+
+# Convert to strings in the format SPICE recognizes
+INITIAL_TIME_UTC_STR = INITIAL_TIME_UTC.strftime("%Y-%m-%dT%H:%M:%S")
+FINAL_TIME_UTC_STR = FINAL_TIME_UTC.strftime("%Y-%m-%dT%H:%M:%S")
+
+print("Initial time (UTC): ", INITIAL_TIME_UTC_STR)
+print("Final time (UTC): ", FINAL_TIME_UTC_STR, "\n")
+
+# Convert UTC to Ephemeris Time
+INITIAL_TIME_ET = spiceypy.utc2et(INITIAL_TIME_UTC_STR)
+FINAL_TIME_ET = spiceypy.utc2et(FINAL_TIME_UTC_STR)
+
+# NOTE that these time calculations have factored in leap seconds. In this case, the difference in 5 sec which may or may not be substantial to your objective
 print(
-    "6-dimensional state vector of Earth relative to the Sun is: \n",
-    EARTH_STATE_WRT_SUN,
-)
-
-
-# Now to check if results make sense:
-
-# Compute distance from Sun to Earth in km
-DIST_EARTH_SUN_km = math.sqrt(
-    EARTH_STATE_WRT_SUN[0] ** 2.0
-    + EARTH_STATE_WRT_SUN[1] ** 2.0
-    + EARTH_STATE_WRT_SUN[2] ** 2.0
-)
-
-# Convert to Astronomical Units -- 1AU is the rough distance between the Earth and Sun
-DIST_EARTH_SUN_au = spiceypy.convrt(DIST_EARTH_SUN_km, "km", "AU")
-
-percent_error = (DIST_EARTH_SUN_au - 1) * 100
-
-print(
-    "The distance between the Sun and Earth in AU is: \n",
-    DIST_EARTH_SUN_au,
-    "AU \n Which is \n",
-    percent_error,
-    "% off from the yearly average",
+    "The time interval covered is",
+    (numpy.round(FINAL_TIME_ET - INITIAL_TIME_ET)),
+    "seconds\n",
 )
 
 
 # ---------------------------------------------------
-# Compute orbital speed of Earth:
 
-EARTH_ORBITALSPEED_WRT_SUN = math.sqrt(
-    EARTH_STATE_WRT_SUN[3] ** 2.0
-    + EARTH_STATE_WRT_SUN[4] ** 2.0
-    + EARTH_STATE_WRT_SUN[5] ** 2.0
+# Create a NumPy array with 10,000 steps (one for each day over the interval)
+TIME_INTERVAL_ET = numpy.linspace(
+    start=INITIAL_TIME_ET, stop=FINAL_TIME_ET, num=DAYS_ELAPSED
+)
+
+# Store position of SSB wrt Sun over 10,000 days in a numpy array and print
+SSB_WRT_SUN = []
+
+for time in TIME_INTERVAL_ET:
+    position, _ = spiceypy.spkgps(targ=0, et=time, ref="ECLIPJ2000", obs=10)
+    SSB_WRT_SUN.append(position)
+
+SSB_WRT_SUN = numpy.array(SSB_WRT_SUN)
+
+""" this is inefficient
+print(
+    "The initial position of SSB wrt Sun is: \nX:",
+    SSB_WRT_SUN[0][0],
+    "km\nY:",
+    SSB_WRT_SUN[0][1],
+    "km\nZ:",
+    SSB_WRT_SUN[0][2],
+    "km",
+)
+"""
+
+print(
+    "The initial position of SSB wrt Sun is: \nX: %s km \nY: %s km \nZ: %s km \n"
+    % tuple(numpy.round(SSB_WRT_SUN[0]))
+)
+
+DISTANCE = lambda x, y, z: math.sqrt(x ** 2.0 + y ** 2.0 + z ** 2.0)
+
+print(
+    "The initial distance between the SSB and Sun is %s"
+    % numpy.round(
+        DISTANCE(SSB_WRT_SUN[0][0], SSB_WRT_SUN[0][1], SSB_WRT_SUN[0][2])
+    ),  # numpy.linalg.norm(SSB_WRT_SUN_[0]) also somehow works?
+    "km\n",
+)
+
+# Put this distance in terms of Sun's radius
+_, SUN_RADII = spiceypy.bodvcd(bodyid=10, item="RADII", maxn=3)
+SUN_RADIUS = SUN_RADII[0]
+SSB_WRT_SUN_SUNRADII = SSB_WRT_SUN / SUN_RADII
+
+print(
+    "The initial position of SSB wrt Sun is: \nX: %s sun radii \nY: %s sun radii \nZ: %s sun radii \n"
+    % tuple(SSB_WRT_SUN_SUNRADII[0])
 )
 
 print(
-    "The actual orbital speed of Earth with respects to the Sun is: \n",
-    EARTH_ORBITALSPEED_WRT_SUN,
-    "km/sec",
+    "The initial distance between the SSB and Sun is %s"
+    % DISTANCE(
+        SSB_WRT_SUN_SUNRADII[0][0],
+        SSB_WRT_SUN_SUNRADII[0][1],
+        SSB_WRT_SUN_SUNRADII[0][2],
+    ),
+    "sun radii",
 )
 
+# Now graph it IN 2 DIMENSIONS
 
-# Now to check if results make sense using equations from AP Physics 1: v=sqrt(Gm/r) (https://www.youtube.com/watch?v=nxD7koHdQhM)
+SSB_WRT_SUN_SUNRADII_XY = SSB_WRT_SUN_SUNRADII[:, 0:2]
 
-# Get double precision value of the universal gravitational constant G times the mass of the Sun
-spiceypy.furnsh("kernels/pck/gm_de431.tpc")
+pyplot.style.use("dark_background")
 
-_, GM_SUN = spiceypy.bodvcd(bodyid=10, item="GM", maxn=1)
+FIG, AX = pyplot.subplots(figsize=(7, 7))
 
-THEORETICAL_EARTH_ORBITALSPEED_WRT_SUN = math.sqrt(GM_SUN[0] / DIST_EARTH_SUN_km)
+SUN_CIRC = pyplot.Circle(
+    (0.0, 0.0), 1.0, color="yellow", alpha=0.8
+)  # Radius is 1 bc unit is sun radii
+AX.add_artist(SUN_CIRC)
 
-print(
-    "The theoretical orbital speed of Earth with respects to the Sun is: \n",
-    THEORETICAL_EARTH_ORBITALSPEED_WRT_SUN,
-    "km/sec",
+AX.plot(
+    SSB_WRT_SUN_SUNRADII_XY[:, 0],
+    SSB_WRT_SUN_SUNRADII_XY[:, 1],
+    ls="solid",
+    color="royalblue",
 )
+
+# Set some parameters for the plot, set an equal ratio, set a grid, and set the x and y limits
+AX.set_aspect("equal")
+AX.grid(True, linestyle="dashed", alpha=0.5)
+AX.set_xlim(-2, 2)
+AX.set_ylim(-2, 2)
+
+# Labelling
+AX.set_xlabel("X [Sun-Radii]")
+AX.set_ylabel("Y [Sun-Radii]")
+AX.set_title(
+    "Trajectory of the Solar System Barycentre (blue) wrt \nthe centre of the Sun (yellow) projected onto the XY (ecliptic) plane\n"
+)
+
+pyplot.show()
+
+# To save the figure:
+# plt.savefig('wee.png', dpi=300)

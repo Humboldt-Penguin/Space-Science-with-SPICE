@@ -1,0 +1,12 @@
+\begindata
+
+    KERNELS_TO_LOAD = (
+        'kernels/spk/de432s.bsp',
+        'kernels/lsk/naif0012.tls.pc',
+        'kernels/pck/gm_de431.tpc')
+
+
+\begintext
+
+    I don't think I actually need all of these? All I need is planet position, mass, time, and reference frame
+
