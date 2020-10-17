@@ -165,13 +165,13 @@ print(
 # 3.1: Plotting gas giants: time v phase angle ---------------------------------------------------
 
 # 4 axes plot, vertically aligned, share x axis (utc)
-FIG, (AX1, AX3, AX3, AX4) = pyplot.subplots(4, 1, sharex=True, figsize=(8, 20))
+FIG, (AX1, AX2, AX3, AX4) = pyplot.subplots(4, 1, sharex=True, figsize=(8, 20))
 
 # Iterate through matplotlib axes & planet data, plot phase angle in each axis
 for ax, planet_name_abrev, planet_name in zip(
     [AX1, AX2, AX3, AX4],
     ["JUP", "SAT", "URA", "NEP"],
-    ["Jupetier", "Saturn", "Uranus", "Neptune"],
+    ["Jupeter", "Saturn", "Uranus", "Neptune"],
 ):
 
     # Title
