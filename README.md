@@ -1,5 +1,3 @@
-Personal notes for [ThomasAlbin's Space Science Tutorials](https://towardsdatascience.com/@thomas.albin)
-
 *“It has been said that astronomy is a humbling and character-building experience.” - Carl Sagan*
 
 Zain Kamal -- z.kamal2021@gmail.com
@@ -24,5 +22,5 @@ Project_0 is for testing packages and verifying computations with physics: SPICE
 
 The large time interval between the maximum and minimum distances indicate that the inner planets cannot be the main contributors of this gravitational pull -- otherwise we would see more short time spikes and variations that correlate with shorter orbital periods. We can analyse the distance between the Sun and the SSB using the phase angle between the SSB and the gas giants as seen from the Sun. It appears that Jupiter is a major factor (since it is the most massive planet and only 5 AU away). However, the other giants cannot be neglected, considering the minimum distance of 0.5 Solar Radii between the years 2012 and 2016. You can see that the phase angles for Saturn, Uranus and Neptune are way larger and create a “counter gravity pull” to the other direction causing the SSB’s position to stay within the Sun. Between 2020 and 2024 the gas giants are more aligned to the same direction causing a maximum distance of almost 2 Solar Radii! [](include some technical stuff on phase angles)
 
-# Project 3: Basic N-Body Simulation [Unfinished]
+# Project 3: Basic N-Body Simulation
 An N-body simulation is a simulation of a dynamical system of particles, usually under the influence of physical forces, such as gravity. This project simulates the movement of the Sun and 8 planets by calculating the net force they exert on each other. VPython is used for 3D simulations.
