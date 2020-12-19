@@ -78,9 +78,9 @@ for body in BODIES:
     BODIES[body]["object"] = vpython.simple_sphere(
         pos=vpython.vector(BODIES[body]["POSwrtSSB_km"][0], BODIES[body]["POSwrtSSB_km"][1], BODIES[body]["POSwrtSSB_km"][2]),
         radius= body_radius * 500,  # 7_000_000, 
-        # color=colors[color],
+        color=colors[color],
         # NOTE: make sure to comment out mr auyeung's face before pushing
-        texture = "https://media-exp1.licdn.com/dms/image/C4E03AQEDA7rEZl0UaQ/profile-displayphoto-shrink_200_200/0?e=1602720000&v=beta&t=BGu8tJH0jLE3RwdyhZCbAyl80rVZ8yffmPT_UrhMMwM",
+        # texture = "https://media-exp1.licdn.com/dms/image/C4E03AQEDA7rEZl0UaQ/profile-displayphoto-shrink_200_200/0?e=1602720000&v=beta&t=BGu8tJH0jLE3RwdyhZCbAyl80rVZ8yffmPT_UrhMMwM",
         # texture = "https://i.imgur.com/cxog7Tk.png",
         shininess = 0,
         make_trail=True,

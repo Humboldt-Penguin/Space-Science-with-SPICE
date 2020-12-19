@@ -24,3 +24,5 @@ The large time interval between the maximum and minimum distances indicate that 
 
 # Project 3: Basic N-Body Simulation
 An N-body simulation is a simulation of a dynamical system of particles, usually under the influence of physical forces, such as gravity. This project simulates the movement of the Sun and 8 planets by calculating the net force they exert on each other. VPython is used for 3D simulations.
+[Figure 3](https://cdn.discordapp.com/attachments/541806426440466452/789752342966173736/unknown.png)
+[Figure 4](https://cdn.discordapp.com/attachments/541806426440466452/789752357612945418/unknown.png)
